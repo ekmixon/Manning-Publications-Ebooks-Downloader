@@ -44,7 +44,7 @@ def main(argv):
 def create_folder():
     global folder
     datetime_object = datetime.date.today()
-    folder = 'Manning_' + str(datetime_object)
+    folder = f'Manning_{str(datetime_object)}'
     try:
         os.mkdir(folder)
         print('Created folder', folder)
@@ -85,7 +85,7 @@ def get_list():
                 # EXAMPLE: winkler
                 author = str(product.find(
                     'form', {'class': 'download-form'})['name']).split('-')[1]
-                restrictedDownloadIds = author + '-restrictedDownloadIds'
+                restrictedDownloadIds = f'{author}-restrictedDownloadIds'
                 download_payload = [
                     ('dropbox', 'false'),
                     ('productExternalId', author)
@@ -101,7 +101,7 @@ def get_list():
                         download_payload.append(checkbox2)
                         # EXAMPLE: [('dropbox', 'false'), ('productExternalId', 'winkler'), ('1971', '7850702'), ('winkler-restrictedDownloadIds', '1971'), ('1972', '7850703'), ('winkler-restrictedDownloadIds', '1972'), ('1973', '7850704'), ('winkler-restrictedDownloadIds', '1973')]
                 try:
-                    subfolder = str(title.replace(' ', '_'))
+                    subfolder = title.replace(' ', '_')
                     path = os.path.join(folder, subfolder)
                     os.makedirs(path)
                     print('Created folder', path)
@@ -110,19 +110,16 @@ def get_list():
                         print(f'Directory {path} already exists.')
                     else:
                         raise
-                downloadURL = 'https://www.manning.com/dashboard/download?id=downloadForm-' + author
+                downloadURL = f'https://www.manning.com/dashboard/download?id=downloadForm-{author}'
+
                 print('Downloading', title, '...')
                 dl = s.post(downloadURL, cookies=s.cookies,
                             headers=headers, data=download_payload)
                 # PURPOSE: Some free titles are only in PDF format, this can be determined from the amount of hidden inputs
-                if len(download_payload) <= 4:
-                    extension = '.pdf'
-                else:
-                    extension = '.zip'
-                filename = path + '/' + subfolder + extension
-                file = open(filename, "wb")
-                file.write(dl.content)
-                file.close()
+                extension = '.pdf' if len(download_payload) <= 4 else '.zip'
+                filename = f'{path}/{subfolder}{extension}'
+                with open(filename, "wb") as file:
+                    file.write(dl.content)
             except TypeError:
                 pass
 
